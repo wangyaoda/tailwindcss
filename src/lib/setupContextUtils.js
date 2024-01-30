@@ -252,6 +252,7 @@ export function parseVariant(variant) {
  * @param {object} param2
  * @param {Offsets} param2.offsets
  */
+// 创建plugin 的 API
 function buildPluginApi(tailwindConfig, context, { variantList, variantMap, offsets, classList }) {
   function getConfigValue(path, defaultValue) {
     return path ? dlv(tailwindConfig, path, defaultValue) : tailwindConfig
@@ -303,6 +304,8 @@ function buildPluginApi(tailwindConfig, context, { variantList, variantMap, offs
         let offset = offsets.create('base')
 
         if (!context.candidateRuleMap.has(prefixedIdentifier)) {
+          // 最终会把各种 CSS 样式放到 context 对象中的 candidateRuleMap 属性中，
+          // 其它诸如 addDefaults、addComponents、addUtilities 一样也都是把相应的 CSS 保存到 context.candidateRuleMap 中。
           context.candidateRuleMap.set(prefixedIdentifier, [])
         }
 
@@ -722,7 +725,12 @@ function collectLayerPlugins(root) {
   return layerPlugins
 }
 
+
+// 整理 TailwindCSS 中的核心插件 和 我们通过配置文件自定义的插件
+// 在将这些插件按照一定顺序返回
 function resolvePlugins(context, root) {
+
+  // 如果使用了tailwindCSS 中的plugin，就放到这个 corePluginList之中
   let corePluginList = Object.entries(corePlugins)
     .map(([name, plugin]) => {
       if (!context.tailwindConfig.corePlugins.includes(name)) {
@@ -733,11 +741,13 @@ function resolvePlugins(context, root) {
     })
     .filter(Boolean)
 
+  // 在此处解析我们自定义的插件,并返回到一个插件集合中
   let userPlugins = context.tailwindConfig.plugins.map((plugin) => {
     if (plugin.__isOptionsFunction) {
       plugin = plugin()
     }
 
+    // 自定义的插件可以是一个对象的形式, 但是必须有一个 handler 函数类型的属性
     return typeof plugin === 'function' ? plugin : plugin.handler
   })
 
@@ -786,12 +796,14 @@ function resolvePlugins(context, root) {
     ]
   }
 
+  // 返回一个插件集合
   return [...corePluginList, ...beforeVariants, ...userPlugins, ...afterVariants, ...layerPlugins]
 }
 
 function registerPlugins(plugins, context) {
   let variantList = []
   let variantMap = new Map()
+  // 传递一个Map对象
   context.variantMap = variantMap
 
   let offsets = new Offsets()
@@ -948,6 +960,7 @@ function registerPlugins(plugins, context) {
     prefix(context, 'group'),
     prefix(context, 'peer'),
   ]
+
   context.getClassOrder = function getClassOrder(classes) {
     // Sort classes so they're ordered in a deterministic manner
     let sorted = [...classes].sort((a, z) => {
@@ -1237,6 +1250,7 @@ function markInvalidUtilityNode(context, node) {
 }
 
 export function createContext(tailwindConfig, changedContent = [], root = postcss.root()) {
+  // 初始化 context 内容 就是一个JavaScript对象
   let context = {
     disposables: [],
     ruleCache: new Set(),

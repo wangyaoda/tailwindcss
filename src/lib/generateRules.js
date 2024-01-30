@@ -892,6 +892,11 @@ function getImportantStrategy(important) {
   }
 }
 
+/*
+
+这个函数的作用就是匹配我们之前保存在 context.candidateRuleMap 里面的具体样式，
+如果匹配到了就会把保存结果放到 context.ruleCache 中以供后续使用。
+*/
 function generateRules(candidates, context, isSorting = false) {
   let allRules = []
   let strategy = getImportantStrategy(context.tailwindConfig.important)

@@ -12,6 +12,7 @@ function license() {
   return `/* ! tailwindcss v${tailwindVersion} | MIT License | https://tailwindcss.com */\n`
 }
 
+// 导出一个 装饰器 ? tailwindcss
 module.exports = function tailwindcss(configOrPath) {
   return {
     postcssPlugin: 'tailwindcss',
@@ -23,11 +24,16 @@ module.exports = function tailwindcss(configOrPath) {
           return root
         },
       ...handleImportAtRules(),
+
       async function (root, result) {
         // Use the path for the `@config` directive if it exists, otherwise use the
         // path for the file being processed
+        // 如果存在，则使用 `@config` 指令的路径，否则使用
+        // 正在处理的文件的路径
         configOrPath = findAtConfigPath(root, result) ?? configOrPath
 
+        // 在框架执行过程中将需要的数据装到 context 中
+        // 使用 setupTrackingContext 函数 获取到 context , context是一个函数
         let context = setupTrackingContext(configOrPath)
 
         if (root.type === 'document') {
@@ -41,9 +47,10 @@ module.exports = function tailwindcss(configOrPath) {
 
           return
         }
-
+        // 无论如何都会执行 processTailwindFeatures 函数
         await processTailwindFeatures(context)(root, result)
       },
+
       function lightningCssPlugin(_root, result) {
         let map = result.map ?? result.opts.map
 
@@ -120,6 +127,7 @@ module.exports = function tailwindcss(configOrPath) {
           throw err
         }
       },
+
       env.DEBUG &&
         function (root) {
           console.timeEnd('JIT TOTAL')
@@ -130,4 +138,5 @@ module.exports = function tailwindcss(configOrPath) {
   }
 }
 
+// 标准的 PostCSS 插件的写法，也就是说tailwindCSS本质就是一个PostCSS插件
 module.exports.postcss = true

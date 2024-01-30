@@ -75,6 +75,8 @@ function getTailwindConfig(configOrPath) {
 // Retrieve an existing context from cache if possible (since contexts are unique per
 // source path), or set up a new one (including setting up watchers and registering
 // plugins) then return it
+
+//  setupTrackingContext 返回的是一个函数
 export default function setupTrackingContext(configOrPath) {
   return ({ tailwindDirectives, registerDependency }) => {
     return (root, result) => {
@@ -83,12 +85,11 @@ export default function setupTrackingContext(configOrPath) {
 
       let contextDependencies = new Set(configDependencies)
 
-      // If there are no @tailwind or @apply rules, we don't consider this CSS
-      // file or its dependencies to be dependencies of the context. Can reuse
-      // the context even if they change. We may want to think about `@layer`
-      // being part of this trigger too, but it's tough because it's impossible
-      // for a layer in one file to end up in the actual @tailwind rule in
-      // another file since independent sources are effectively isolated.
+      // 如果没有 @tailwind 或 @apply 规则，我们不将此 CSS 文件或其依赖项视为上下文的依赖项。
+      // 即使它们发生变化，也可以重用上下文。 我们可能还需要考虑 '@layer' 是否也是此触发器的一部分，
+      // 但这很困难，因为一个文件中的层可能不会在另一个文件的实际 @tailwind 规则中出现，
+      // 因为独立的源实际上是被隔离的。
+
       if (tailwindDirectives.size > 0) {
         // Add current css file as a context dependencies.
         contextDependencies.add(result.opts.from)
@@ -101,6 +102,7 @@ export default function setupTrackingContext(configOrPath) {
         }
       }
 
+      //  通过 getContext 返回真正的 context 实例
       let [context, , mTimesToCommit] = getContext(
         root,
         result,

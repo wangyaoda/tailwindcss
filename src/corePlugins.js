@@ -541,6 +541,8 @@ let cssBackdropFilterValue = [
   'var(--tw-backdrop-sepia)',
 ].join(' ')
 
+// tailwindCss 中的 用来装配初始化各种TailwindCSS 内置的 CSS 样式
+// 根据这些插件将CSS 转成 class 的形式
 export let corePlugins = {
   preflight: ({ addBase }) => {
     let preflightStyles = postcss.parse(
